@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Home, Phone, PhoneOff, Mic, MicOff, Unlock } from 'lucide-react';
 import { useCalls, useCallsSubscription } from './queries/webrtc';
 import { acceptCall } from './webrtc/accept_call';
@@ -98,6 +98,7 @@ function CallDeclined({ startNewCall }: {startNewCall: () => void}) {
 
 // Main IntercomCallScreen Component
 export default function IntercomCallScreen() {
+  const audioRef = useRef<HTMLAudioElement>(null)
   const [callStatus, setCallStatus] = useState('declined'); // incoming, accepted, declined
   const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
@@ -147,7 +148,7 @@ export default function IntercomCallScreen() {
     setCallStatus('accepted');
     setCallDuration(0);
     if (call) {
-      acceptCall(call.id)
+      acceptCall(call.id, audioRef)
     }
   };
 
@@ -198,6 +199,7 @@ export default function IntercomCallScreen() {
   // Active call screen
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
+      <audio ref={audioRef}  autoPlay/>
       {/* Status bar */}
       <div className="pt-12 pb-4 px-6 z-10">
         <div className="flex justify-between items-center">

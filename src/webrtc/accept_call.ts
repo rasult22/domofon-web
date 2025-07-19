@@ -7,7 +7,7 @@ const calls = pb.collection('calls');
 const offerCandidates = pb.collection('offer_candidates');
 const answerCandidates = pb.collection('answer_candidates');
 
-export const acceptCall = async (callId: string) => {
+export const acceptCall = async (callId: string, audioRef:React.RefObject<HTMLAudioElement | null>) => {
   // Authenticate
   const auth = await pb
     .collection('users')
@@ -41,6 +41,12 @@ export const acceptCall = async (callId: string) => {
 
   // Setup remote stream
   const remoteStream = new MediaStream();
+  if (audioRef.current) {
+    audioRef.current.srcObject = remoteStream;
+    audioRef.current.play();
+    audioRef.current.autoplay = true;
+  }
+
   pc.addEventListener('track', (event) => {
     event.streams[0]?.getTracks().forEach(track => {
       console.log(track, 'track')
