@@ -6,4 +6,5 @@ const queryClient = new QueryClient({
 });
 
 export const pb = new PB('https://rasult22.pockethost.io')
+pb.autoCancellation(false)
 export default queryClient;
