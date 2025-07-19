@@ -11,12 +11,17 @@ export const acceptCall = async (callId: string) => {
   // Authenticate
   const auth = await pb
     .collection('users')
-    .authWithPassword('webrtc_web', '12345678');
+    .authWithPassword('webrtc_native', '12345678');
 
-  // Get ICE servers
-  const iceServers = await pb.collection('ice_servers').getFullList();
   const config = {
-    iceServers: iceServers.map(e => ({ urls: e.url })),
+    iceServers: [{
+      urls: [
+        "stun1.l.google.com:19302",
+        "stun2.l.google.com:19302",
+        "stun3.l.google.com:19302",
+        "stun4.l.google.com:19302"
+      ]
+    }],
     iceCandidatePoolSize: 10,
   };
 

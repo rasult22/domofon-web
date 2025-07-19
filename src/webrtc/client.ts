@@ -17,9 +17,15 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
   const userId = auth.record.id;
   
   // get ice servers
-  const iceServers = await pb.collection("ice_servers").getFullList();
   const servers = {
-    iceServers: [{ urls: iceServers.map((e) => e.url) }],
+    iceServers: [{
+      urls: [
+        "stun1.l.google.com:19302",
+        "stun2.l.google.com:19302",
+        "stun3.l.google.com:19302",
+        "stun4.l.google.com:19302"
+      ]
+    }],
     iceCandidatePoolSize: 10,
   };
 
