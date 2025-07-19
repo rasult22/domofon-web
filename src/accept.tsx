@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Home, Phone, PhoneOff, Mic, MicOff, Unlock } from 'lucide-react';
+import { useCalls, useCallsSubscription } from './queries/webrtc';
+import { acceptCall } from './webrtc/accept_call';
 
 // GettingCall Component
 function GettingCall({ handleAccept, handleDecline }: {
@@ -100,16 +102,29 @@ export default function IntercomCallScreen() {
   const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [isDoorOpened, setIsDoorOpened] = useState(false);
+  const [call, setCall] = useState<{
+      id: string;
+      user_id: string;
+      offer: any;
+      answer: any;
+      receiver_id: string;
+      status: string;
+  }>()
+  const {data} = useCalls()
+  useCallsSubscription()
 
   // Simulate incoming call after component mounts
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (callStatus === 'declined') {
-        setCallStatus('incoming');
+    console.log(data, 'calls')
+    if (callStatus === 'declined' && data?.length) {
+      const call = data.find(c => c.status === 'pending')
+      console.log('got i new call here it is:', call)
+      if (call) {
+        setCallStatus('incoming')
+        setCall(call)
       }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [data]);
 
   // Call duration timer
   useEffect(() => {
@@ -131,6 +146,9 @@ export default function IntercomCallScreen() {
   const handleAccept = () => {
     setCallStatus('accepted');
     setCallDuration(0);
+    if (call) {
+      acceptCall(call.id)
+    }
   };
 
   const handleDecline = () => {

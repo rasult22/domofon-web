@@ -38,9 +38,6 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
     audio: true,
   });
   const remoteStream = new MediaStream();
-  if (audioRef.current) {
-    audioRef.current.srcObject = remoteStream;
-  }
   
   // add localStream tracks to peer connection
   localStream.getTracks().forEach((track) => {
@@ -50,6 +47,10 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
   // set up ontrack to receive the remote stream
   pc.ontrack = (event) => {
     const stream = event.streams[0];
+    if (audioRef.current) {
+      audioRef.current.srcObject = stream
+      audioRef.current.play();
+    }
     stream.getTracks().forEach((track) => {
       console.log(track, 'track')
       remoteStream?.addTrack(track);
