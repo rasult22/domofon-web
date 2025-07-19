@@ -68,7 +68,6 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
     if(event.candidate) {
       console.log('creating event candidate')
       await offerCandidates.create({
-
         call_id: call.id,
         data: event.candidate.toJSON()
       })
@@ -76,7 +75,10 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
   }
   
   // create offer
-  const offerDescription = await pc.createOffer();
+  const offerDescription = await pc.createOffer({
+    offerToReceiveAudio: true,
+    offerToReceiveVideo: false
+  });
 
   // set local offer desc
   await pc.setLocalDescription(offerDescription);
