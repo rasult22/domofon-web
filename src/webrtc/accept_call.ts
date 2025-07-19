@@ -41,17 +41,17 @@ export const acceptCall = async (callId: string, audioRef:React.RefObject<HTMLAu
 
   // Setup remote stream
   const remoteStream = new MediaStream();
-  if (audioRef.current) {
-    audioRef.current.srcObject = remoteStream;
-    audioRef.current.play();
-    audioRef.current.autoplay = true;
-  }
 
   pc.addEventListener('track', (event) => {
-    event.streams[0]?.getTracks().forEach(track => {
+    const stream = event.streams[0] 
+    stream?.getTracks().forEach(track => {
       console.log(track, 'track')
       remoteStream.addTrack(track);
     });
+    if (audioRef.current) {
+      audioRef.current.srcObject = stream;
+      audioRef.current.play();
+    }
 
     // TODO: pass remoteStream to your app's audio playback logic
     // e.g., setRemoteStream(remoteStream) in your state

@@ -179,113 +179,102 @@ export default function IntercomCallScreen() {
     setIsMuted(false);
   };
 
-  // Incoming call screen
-  if (callStatus === 'incoming') {
-    return (
-      <GettingCall 
+  return (
+    <>
+      <audio ref={audioRef}  autoPlay/>
+      {callStatus === 'declined' && <CallDeclined startNewCall={startNewCall} />}
+      {callStatus === 'incoming' && <GettingCall 
         handleAccept={handleAccept} 
         handleDecline={handleDecline} 
-      />
-    );
-  }
-
-  // Call declined screen
-  if (callStatus === 'declined') {
-    return (
-      <CallDeclined startNewCall={startNewCall} />
-    );
-  }
-
-  // Active call screen
-  return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
-      <audio ref={audioRef}  autoPlay/>
-      {/* Status bar */}
-      <div className="pt-12 pb-4 px-6 z-10">
-        <div className="flex justify-between items-center">
-          <span className="text-white text-sm opacity-75">Разговор</span>
-          <span className="text-white text-sm opacity-75">
-            {formatTime(callDuration)}
-          </span>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col justify-center items-center px-8">
-        <div className="flex flex-col items-center mb-12">
-          {/* Intercom icon */}
-          <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-2xl">
-            <Home size={64} color="white" />
-          </div>
-          
-          <h1 className="text-white text-3xl font-bold mb-2">Домофон</h1>
-          <p className="text-gray-400 mt-2 text-base text-center">
-            Кто-то звонит в домофон
-          </p>
-        </div>
-
-        {/* Connected status */}
-        <div className="flex items-center mb-8">
-          <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-          <span className="text-green-400 text-sm">Соединен</span>
-        </div>
-
-        {/* Door status */}
-        {isDoorOpened && (
-          <div className="flex items-center mb-4">
-            <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
-            <span className="text-orange-400 text-sm">Дверь открыта</span>
-          </div>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="pb-12 px-8">
-        {/* Mute button */}
-        <div className="flex justify-center items-center pb-8">
-          <button
-            onClick={toggleMute}
-            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
-              isMuted ? 'bg-red-600' : 'bg-gray-700'
-            }`}
-          >
-            {isMuted ? (
-              <MicOff size={32} color="white" />
-            ) : (
-              <Mic size={32} color="white" />
-            )}
-          </button>
-        </div>
-
-        {/* Door and end call buttons */}
-        <div className="flex justify-between items-center px-8">
-          {/* Door button */}
-          <div className="flex flex-col items-center gap-2">
-            <button
-              onClick={handleOpenDoor}
-              disabled={isDoorOpened}
-              className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-105 active:scale-95 ${
-                isDoorOpened ? 'bg-orange-600' : 'bg-blue-600'
-              } ${isDoorOpened ? 'opacity-60 cursor-not-allowed' : ''}`}
-            >
-              <Unlock size={32} color="white" />
-            </button>
-            <span className={`text-sm font-medium ${
-              isDoorOpened ? 'text-orange-400' : 'text-blue-400'
-            }`}>
-              {isDoorOpened ? 'Дверь открыта' : 'Открыть дверь'}
+      />}
+      <div className="flex flex-col h-screen bg-gray-900 text-white">
+        {/* Status bar */}
+        <div className="pt-12 pb-4 px-6 z-10">
+          <div className="flex justify-between items-center">
+            <span className="text-white text-sm opacity-75">Разговор</span>
+            <span className="text-white text-sm opacity-75">
+              {formatTime(callDuration)}
             </span>
           </div>
+        </div>
 
-          {/* End call button */}
-          <button
-            onClick={handleEndCall}
-            className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-transform"
-          >
-            <PhoneOff size={32} color="white" />
-          </button>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col justify-center items-center px-8">
+          <div className="flex flex-col items-center mb-12">
+            {/* Intercom icon */}
+            <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-2xl">
+              <Home size={64} color="white" />
+            </div>
+            
+            <h1 className="text-white text-3xl font-bold mb-2">Домофон</h1>
+            <p className="text-gray-400 mt-2 text-base text-center">
+              Кто-то звонит в домофон
+            </p>
+          </div>
+
+          {/* Connected status */}
+          <div className="flex items-center mb-8">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            <span className="text-green-400 text-sm">Соединен</span>
+          </div>
+
+          {/* Door status */}
+          {isDoorOpened && (
+            <div className="flex items-center mb-4">
+              <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
+              <span className="text-orange-400 text-sm">Дверь открыта</span>
+            </div>
+          )}
+        </div>
+
+        {/* Controls */}
+        <div className="pb-12 px-8">
+          {/* Mute button */}
+          <div className="flex justify-center items-center pb-8">
+            <button
+              onClick={toggleMute}
+              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
+                isMuted ? 'bg-red-600' : 'bg-gray-700'
+              }`}
+            >
+              {isMuted ? (
+                <MicOff size={32} color="white" />
+              ) : (
+                <Mic size={32} color="white" />
+              )}
+            </button>
+          </div>
+
+          {/* Door and end call buttons */}
+          <div className="flex justify-between items-center px-8">
+            {/* Door button */}
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={handleOpenDoor}
+                disabled={isDoorOpened}
+                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-105 active:scale-95 ${
+                  isDoorOpened ? 'bg-orange-600' : 'bg-blue-600'
+                } ${isDoorOpened ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                <Unlock size={32} color="white" />
+              </button>
+              <span className={`text-sm font-medium ${
+                isDoorOpened ? 'text-orange-400' : 'text-blue-400'
+              }`}>
+                {isDoorOpened ? 'Дверь открыта' : 'Открыть дверь'}
+              </span>
+            </div>
+
+            {/* End call button */}
+            <button
+              onClick={handleEndCall}
+              className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-transform"
+            >
+              <PhoneOff size={32} color="white" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
