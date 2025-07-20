@@ -117,4 +117,10 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
       }
     }
   })
+  return {
+    call,
+    pc,
+    localStream,
+    remoteStream
+  }
 }

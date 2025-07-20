@@ -1,99 +1,18 @@
 import { useRef, useState } from 'react';
-import { Phone, ArrowLeft, Home } from 'lucide-react';
 import { call } from './webrtc/client';
+import { ApartmentDetail } from './components/ApartmentDetail';
+import { ApartmentList } from './components/ApartmentList';
+import type { Apartment } from './types/apartment';
+import { CallingStatus } from './components/CallingStatus';
+import { CallEnded } from './components/CallEnded';
+import { CallDeclined } from './components/CallDeclined';
 
-// Компонент списка квартир
-const ApartmentList = ({ apartments, onSelectApartment }: {
-  apartments: Apartment[];
-  onSelectApartment: (apartment: Apartment) => void;
-}) => {
-  return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="text-center mb-6">
-            <Home className="w-12 h-12 text-blue-600 mx-auto mb-2" />
-            <h1 className="text-2xl font-bold text-gray-800">ЖК Солнечный</h1>
-            <p className="text-gray-600">Выберите квартиру для звонка</p>
-          </div>
-          
-          <div className="grid grid-cols-4 gap-3">
-            {apartments.map((apartment) => (
-              <button
-                key={apartment.id}
-                onClick={() => onSelectApartment(apartment)}
-                className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-6 text-center transition-colors duration-200"
-              >
-                <div className="text-3xl font-bold text-blue-800">
-                  {apartment.number}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Компонент информации о квартире с возможностью звонка
-const ApartmentDetail = ({ apartment, onBack, onCall }: {
-  apartment: Apartment;
-  onBack: () => void;
-  onCall: (apartment: Apartment) => void;
-}) => {
-  return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="text-center mb-6">
-            <div className="text-5xl font-bold text-blue-600 mb-4">
-              {apartment.number}
-            </div>
-            <p className="text-lg text-gray-600">
-              {apartment.floor} этаж
-            </p>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-gray-600">
-                Нажмите кнопку "Позвонить" чтобы связаться с жильцом
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <button
-              onClick={() => onCall(apartment)}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors text-lg"
-            >
-              <Phone className="w-6 h-6" />
-              Позвонить
-            </button>
-            
-            <button
-              onClick={onBack}
-              className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Вернуться к списку
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-type Apartment = {
-  id: number;
-  number: string;
-  floor: number;
-};
-
+type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'NONE'
 // Главный компонент приложения
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [callId, setCallId] =useState<string>()
+  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('CALLING')
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
 
   // Данные о квартирах в доме
@@ -121,14 +40,29 @@ const HomeScreen = () => {
   };
 
   const handleCall = async () => {
-  await call(audioRef)
-
+  const { call: callData } = await call(audioRef)
+  if (callData) {
+    setCallId(callData.id)
+  }  
     // when call status changes show talking screen
   };
+  const handleEndCall = () => {
+    setSelectedApartment(null);
+    setCallOverlayStatus('ENDED')
+  }
 
   return (
     <div className='flex w-full flex-1 justify-center'>
       <audio ref={audioRef} autoPlay></audio>
+      <div className='absolute w-full top-0 right-0'>
+        {callOverlayStatus === 'CALLING' && <CallingStatus onEndCall={handleEndCall} />}
+        {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
+          setCallOverlayStatus('NONE')
+        }} />}
+        {callOverlayStatus === 'DECLINED' && <CallDeclined onBack={() => {
+          setCallOverlayStatus('NONE')
+        }} />}
+      </div>
       {selectedApartment ? (
         <ApartmentDetail 
           apartment={selectedApartment}
