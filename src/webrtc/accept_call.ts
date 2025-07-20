@@ -9,7 +9,7 @@ const answerCandidates = pb.collection('answer_candidates');
 
 export const acceptCall = async (callId: string, audioRef:React.RefObject<HTMLAudioElement | null>) => {
   // Authenticate
-  const auth = await pb
+  await pb
     .collection('users')
     .authWithPassword('webrtc_native', '12345678');
 

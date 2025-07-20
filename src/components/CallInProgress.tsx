@@ -1,4 +1,4 @@
-import { Phone, Mic } from 'lucide-react';
+import { Mic } from 'lucide-react';
 
 type CallInProgressProps = {
   duration?: number; // длительность звонка в секундах

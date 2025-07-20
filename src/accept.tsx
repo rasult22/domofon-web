@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Home, Phone, PhoneOff, Mic, MicOff, Unlock } from 'lucide-react';
 import { useCalls, useCallsSubscription } from './queries/webrtc';
 import { acceptCall } from './webrtc/accept_call';
