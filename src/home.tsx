@@ -5,11 +5,12 @@ import { ApartmentList } from './components/ApartmentList';
 import type { Apartment } from './types/apartment';
 import { CallingStatus } from './components/CallingStatus';
 import { CallEnded } from './components/CallEnded';
+import { CallInProgress } from './components/CallInProgress';
 import { CallDeclined } from './components/CallDeclined';
 import { pb } from './queries/client';
 import { useCalls, useCallsSubscription } from './queries/webrtc';
 
-type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'NONE'
+type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'CALL_IN_PROGRESS' | 'NONE' 
 // Главный компонент приложения
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -18,7 +19,7 @@ const HomeScreen = () => {
   const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
   const [localStream, setLocalStream] = useState<MediaStream>()
-  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
+  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('CALL_IN_PROGRESS')
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
 
   // Данные о квартирах в доме
@@ -87,6 +88,7 @@ const HomeScreen = () => {
       <audio ref={audioRef} autoPlay></audio>
       <div className='absolute w-full top-0 right-0'>
         {callOverlayStatus === 'CALLING' && <CallingStatus onEndCall={handleEndCall} />}
+        {callOverlayStatus === 'CALL_IN_PROGRESS' && <CallInProgress onEndCall={handleEndCall} />}
         {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
           setCallOverlayStatus('NONE')
         }} />}
