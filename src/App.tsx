@@ -29,7 +29,7 @@ function Authenticate() {
     const fn = async () => {
       const auth = await pb
         .collection('users')
-        .authWithPassword('webrtc_native', '12345678');
+        .authWithPassword('webrtc_web', '12345678');
       if (auth) {
         navigate('/home')
       }
