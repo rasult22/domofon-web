@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { call } from './webrtc/client';
 import { ApartmentDetail } from './components/ApartmentDetail';
 import { ApartmentList } from './components/ApartmentList';
@@ -6,13 +6,19 @@ import type { Apartment } from './types/apartment';
 import { CallingStatus } from './components/CallingStatus';
 import { CallEnded } from './components/CallEnded';
 import { CallDeclined } from './components/CallDeclined';
+import { pb } from './queries/client';
+import { useCalls, useCallsSubscription } from './queries/webrtc';
 
 type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'NONE'
 // Главный компонент приложения
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
+  const {data: calls} = useCalls()
+  useCallsSubscription()
+  const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
-  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('CALLING')
+  const [localStream, setLocalStream] = useState<MediaStream>()
+  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
 
   // Данные о квартирах в доме
@@ -40,16 +46,41 @@ const HomeScreen = () => {
   };
 
   const handleCall = async () => {
-  const { call: callData } = await call(audioRef)
-  if (callData) {
-    setCallId(callData.id)
-  }  
+    setCallOverlayStatus('CALLING')
+    const { call: callData, pc: incomingPC, localStream} = await call(audioRef)
+    if (callData) {
+      setCallId(callData.id)
+    }
+    if (incomingPC) {
+      setPC(incomingPC)
+    }
+    if (localStream) {
+      setLocalStream(localStream)
+    }
     // when call status changes show talking screen
   };
-  const handleEndCall = () => {
+  const handleEndCall = (status: CallOverlayStatus = 'ENDED') => {
     setSelectedApartment(null);
-    setCallOverlayStatus('ENDED')
+    setCallOverlayStatus(status)
+    if (callId) {
+      pb.collection('calls').delete(callId)
+    }
+    if (pc) {
+      pc.close()
+    }
+    if (localStream) {
+      console.log('stopping tracks')
+      localStream.getTracks().forEach(track => {
+        track.stop();
+      })
+    }
   }
+
+  useEffect(() => {
+    if (calls && calls.length < 1 && pc && localStream && callId && callOverlayStatus === 'CALLING') {
+      handleEndCall('DECLINED')
+    }
+  }, [calls])
 
   return (
     <div className='flex w-full flex-1 justify-center'>
