@@ -22,9 +22,9 @@ export const ApartmentList = ({ apartments, onSelectApartment }: ApartmentListPr
               <button
                 key={apartment.id}
                 onClick={() => onSelectApartment(apartment)}
-                className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-6 text-center transition-colors duration-200"
+                className="bg-blue-50 hover:bg-blue-100 border-2 flex justify-center items-center border-blue-200 rounded-lg p-6 text-center transition-colors duration-200"
               >
-                <div className="text-3xl font-bold text-blue-800">
+                <div className="text-3xl font-bold text-center text-blue-800">
                   {apartment.number}
                 </div>
               </button>

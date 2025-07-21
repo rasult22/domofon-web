@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { call } from './webrtc/client';
 import { ApartmentDetail } from './components/ApartmentDetail';
 import { ApartmentList } from './components/ApartmentList';
@@ -8,18 +8,18 @@ import { CallEnded } from './components/CallEnded';
 import { CallInProgress } from './components/CallInProgress';
 import { CallDeclined } from './components/CallDeclined';
 import { pb } from './queries/client';
-import { useCalls, useCallsSubscription } from './queries/webrtc';
+import { useCallsSubscription } from './queries/webrtc';
 
 type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'CALL_IN_PROGRESS' | 'NONE' 
 // Главный компонент приложения
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const {data: calls} = useCalls()
+  // const {data: calls} = useCalls()
   useCallsSubscription()
   const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
   const [localStream, setLocalStream] = useState<MediaStream>()
-  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('CALL_IN_PROGRESS')
+  const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
 
   // Данные о квартирах в доме
@@ -77,11 +77,11 @@ const HomeScreen = () => {
     }
   }
 
-  useEffect(() => {
-    if (calls && calls.length < 1 && pc && localStream && callId && callOverlayStatus === 'CALLING') {
-      handleEndCall('DECLINED')
-    }
-  }, [calls])
+  // useEffect(() => {
+  //   if (calls && calls.length < 1 && pc && localStream && callId && callOverlayStatus === 'CALLING') {
+  //     handleEndCall('DECLINED')
+  //   }
+  // }, [calls])
 
   return (
     <div className='flex w-full flex-1 justify-center'>
