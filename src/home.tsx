@@ -3,12 +3,12 @@ import { call } from './webrtc/client';
 import { ApartmentDetail } from './components/ApartmentDetail';
 import { ApartmentList } from './components/ApartmentList';
 import type { Apartment } from './types/apartment';
-import { CallingStatus } from './components/CallingStatus';
 import { CallEnded } from './components/CallEnded';
 import { CallInProgress } from './components/CallInProgress';
 import { CallDeclined } from './components/CallDeclined';
 import { pb } from './queries/client';
 import { useCallsSubscription } from './queries/webrtc';
+import { VideoCalling } from './components/VideoCalling';
 
 type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'CALL_IN_PROGRESS' | 'NONE' 
 // Главный компонент приложения
@@ -19,6 +19,7 @@ const HomeScreen = () => {
   const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
   const [localStream, setLocalStream] = useState<MediaStream>()
+  const [remoteStream, setRemoteStream] = useState<MediaStream>()
   const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
 
@@ -48,7 +49,7 @@ const HomeScreen = () => {
 
   const handleCall = async () => {
     setCallOverlayStatus('CALLING')
-    const { call: callData, pc: incomingPC, localStream} = await call(audioRef)
+    const { call: callData, pc: incomingPC, localStream, remoteStream} = await call(audioRef)
     if (callData) {
       setCallId(callData.id)
     }
@@ -57,6 +58,9 @@ const HomeScreen = () => {
     }
     if (localStream) {
       setLocalStream(localStream)
+    }
+    if (remoteStream) {
+      setRemoteStream(remoteStream)
     }
     // when call status changes show talking screen
   };
@@ -87,7 +91,9 @@ const HomeScreen = () => {
     <div className='flex w-full flex-1 justify-center'>
       <audio ref={audioRef} autoPlay></audio>
       <div className='absolute w-full top-0 right-0'>
-        {callOverlayStatus === 'CALLING' && <CallingStatus onEndCall={handleEndCall} />}
+        
+        {callOverlayStatus === 'CALLING' && <VideoCalling localStream={localStream} remoteStream={remoteStream} onEndCall={handleEndCall} />}
+        {/* {callOverlayStatus === 'CALLING' && <CallingStatus onEndCall={handleEndCall} />} */}
         {callOverlayStatus === 'CALL_IN_PROGRESS' && <CallInProgress onEndCall={handleEndCall} />}
         {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
           setCallOverlayStatus('NONE')

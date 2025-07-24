@@ -34,7 +34,7 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
   
   // initialize streams
   const localStream = await navigator.mediaDevices.getUserMedia({
-    video: false,
+    video: true,
     audio: true,
   });
   const remoteStream = new MediaStream();
@@ -78,7 +78,7 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
   // create offer
   const offerDescription = await pc.createOffer({
     offerToReceiveAudio: true,
-    offerToReceiveVideo: false
+    offerToReceiveVideo: true
   });
 
   // set local offer desc
