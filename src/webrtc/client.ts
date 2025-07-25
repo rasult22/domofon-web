@@ -5,17 +5,18 @@ pb.autoCancellation(false)
 const calls = pb.collection("calls");
 const offerCandidates = pb.collection("offer_candidates");
 const answerCandidates = pb.collection("answer_candidates");
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) => {
+export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>) => {
 
   // authenticate
   const auth = await pb
     .collection("users")
     .authWithPassword('webrtc_web', '12345678');
-  
-    // get user id
+
+  // get user id
   const userId = auth.record.id;
-  
+
   // get ice servers
   const servers = {
     iceServers: [{
@@ -31,14 +32,20 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
 
   // create Peer connection
   const pc = new RTCPeerConnection(servers);
-  
+
   // initialize streams
   const localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true,
+    video: isMobile
+      ? { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } }
+      : { width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
   });
   const remoteStream = new MediaStream();
-  
+
   // add localStream tracks to peer connection
   localStream.getTracks().forEach((track) => {
     pc.addTrack(track, localStream as MediaStream);
@@ -66,7 +73,7 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
 
   // sending offer candidates to the backend (pocketbase)
   pc.onicecandidate = async (event) => {
-    if(event.candidate) {
+    if (event.candidate) {
       console.log('creating event candidate')
       await offerCandidates.create({
         call_id: call.id,
@@ -74,7 +81,7 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
       })
     }
   }
-  
+
   // create offer
   const offerDescription = await pc.createOffer({
     offerToReceiveAudio: true,
@@ -83,7 +90,7 @@ export const call = async (audioRef:React.RefObject<HTMLAudioElement | null>) =>
 
   // set local offer desc
   await pc.setLocalDescription(offerDescription);
-  
+
   // prepare payload
   const offer = {
     sdp: offerDescription.sdp,

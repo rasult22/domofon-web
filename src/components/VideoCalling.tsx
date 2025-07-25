@@ -38,11 +38,10 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
   const toggleMicrophone = () => {
     const audioTracks = localStream?.getAudioTracks();
     if (audioTracks && audioTracks.length > 0) {
-      const enabled = !isMicMuted;
       audioTracks.forEach(track => {
-        track.enabled = enabled;
+        track.enabled = !isMicMuted;
       });
-      setIsMicMuted(enabled);
+      setIsMicMuted(!isMicMuted);
     }
   };
   
@@ -68,7 +67,7 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col">
           <div className="text-center mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Видеозвонок</h1>
             <p className="text-gray-600 mt-2">{formatTime(callDuration)}</p>
@@ -79,8 +78,8 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
             <span className="text-green-600 text-sm">Соединение установлено</span>
           </div>
           
-          {/* Remote Video (Large) */}
-          <div className="relative mb-4 bg-black rounded-lg overflow-hidden aspect-video">
+          {/* Remote Video (Large) - Портретный формат */}
+          <div className="relative mb-4 bg-black rounded-lg overflow-hidden" style={{aspectRatio: '9/16', height: '60vh'}}>
             <video 
               ref={remoteVideoRef} 
               className="w-full h-full object-cover" 
@@ -89,7 +88,7 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
             />
             
             {/* Local Video (Small overlay) */}
-            <div className="absolute bottom-4 right-4 w-1/3 rounded-lg overflow-hidden border-2 border-white">
+            <div className="absolute bottom-4 right-4 w-1/4 rounded-lg overflow-hidden border-2 border-white" style={{aspectRatio: '9/16'}}>
               <video 
                 ref={localVideoRef} 
                 className="w-full h-full object-cover" 
@@ -102,12 +101,12 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
           
           {/* Controls */}
           <div className="flex justify-center gap-4 mb-6">
-            <button
+            {/* <button
               onClick={toggleMicrophone}
               className={`p-3 rounded-full ${isMicMuted ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-700'}`}
             >
               {isMicMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-            </button>
+            </button> */}
             
             <button
               onClick={toggleVideo}
