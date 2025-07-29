@@ -34,15 +34,16 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
     return () => clearInterval(timer);
   }, []);
   
-  // // Toggle microphone
+  // Toggle microphone
   const toggleMicrophone = () => {
     const audioTracks = localStream?.getAudioTracks();
     if (audioTracks && audioTracks.length > 0) {
       setIsMicMuted(isMuted => {
+        const newMutedState = !isMuted;
         audioTracks.forEach(track => {
-          track.enabled = !isMuted;
+          track.enabled = !newMutedState; // Если muted = true, то enabled = false
         });
-        return !isMuted;
+        return newMutedState;
       });
     }
   };
