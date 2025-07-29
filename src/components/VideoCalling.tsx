@@ -40,7 +40,7 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
     if (audioTracks && audioTracks.length > 0) {
       setIsMicMuted(isMuted => {
         audioTracks.forEach(track => {
-          track.enabled = !isMicMuted;
+          track.enabled = !isMuted;
         });
         return !isMuted;
       });
