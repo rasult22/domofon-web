@@ -37,7 +37,7 @@ export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>) =
   const localStream = await navigator.mediaDevices.getUserMedia({
     video: isMobile
       ? { facingMode: 'user'}
-      : { width: { ideal: 1280 }, height: { ideal: 720 } },
+      : true,
     audio: {
       echoCancellation: true,
       noiseSuppression: true,

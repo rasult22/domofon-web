@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Video, VideoOff, PhoneOff } from 'lucide-react';
+import { Video, VideoOff, PhoneOff, MicOff, Mic } from 'lucide-react';
 
 type VideoCallingProps = {
   localStream?: MediaStream;
@@ -8,7 +8,7 @@ type VideoCallingProps = {
 };
 
 export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCallingProps) => {
-  // const [isMicMuted, setIsMicMuted] = useState(false);
+  const [isMicMuted, setIsMicMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -35,15 +35,17 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
   }, []);
   
   // // Toggle microphone
-  // const toggleMicrophone = () => {
-  //   const audioTracks = localStream?.getAudioTracks();
-  //   if (audioTracks && audioTracks.length > 0) {
-  //     audioTracks.forEach(track => {
-  //       track.enabled = !isMicMuted;
-  //     });
-  //     setIsMicMuted(!isMicMuted);
-  //   }
-  // };
+  const toggleMicrophone = () => {
+    const audioTracks = localStream?.getAudioTracks();
+    if (audioTracks && audioTracks.length > 0) {
+      setIsMicMuted(isMuted => {
+        audioTracks.forEach(track => {
+          track.enabled = !isMicMuted;
+        });
+        return !isMuted;
+      });
+    }
+  };
   
   // Toggle video
   const toggleVideo = () => {
@@ -101,12 +103,12 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
           
           {/* Controls */}
           <div className="flex justify-center gap-4 mb-6">
-            {/* <button
+            <button
               onClick={toggleMicrophone}
               className={`p-3 rounded-full ${isMicMuted ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-700'}`}
             >
-              {isMicMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-            </button> */}
+              {isMicMuted ? <MicOff key={'mic-off'} className="w-6 h-6" /> : <Mic key={'mic-on'} className="w-6 h-6" />}
+            </button>
             
             <button
               onClick={toggleVideo}
