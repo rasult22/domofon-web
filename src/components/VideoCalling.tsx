@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react';
+import { Video, VideoOff, PhoneOff } from 'lucide-react';
 
 type VideoCallingProps = {
   localStream?: MediaStream;
@@ -8,7 +8,7 @@ type VideoCallingProps = {
 };
 
 export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCallingProps) => {
-  const [isMicMuted, setIsMicMuted] = useState(false);
+  // const [isMicMuted, setIsMicMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -34,16 +34,16 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
     return () => clearInterval(timer);
   }, []);
   
-  // Toggle microphone
-  const toggleMicrophone = () => {
-    const audioTracks = localStream?.getAudioTracks();
-    if (audioTracks && audioTracks.length > 0) {
-      audioTracks.forEach(track => {
-        track.enabled = !isMicMuted;
-      });
-      setIsMicMuted(!isMicMuted);
-    }
-  };
+  // // Toggle microphone
+  // const toggleMicrophone = () => {
+  //   const audioTracks = localStream?.getAudioTracks();
+  //   if (audioTracks && audioTracks.length > 0) {
+  //     audioTracks.forEach(track => {
+  //       track.enabled = !isMicMuted;
+  //     });
+  //     setIsMicMuted(!isMicMuted);
+  //   }
+  // };
   
   // Toggle video
   const toggleVideo = () => {
