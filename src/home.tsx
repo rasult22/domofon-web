@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
 import { call } from './webrtc/client';
-import { ApartmentDetail } from './components/ApartmentDetail';
-import { ApartmentList } from './components/ApartmentList';
-import type { Apartment } from './types/apartment';
+import { ApartmentInput } from './components/ApartmentInput';
 import { CallEnded } from './components/CallEnded';
 import { CallInProgress } from './components/CallInProgress';
 import { CallDeclined } from './components/CallDeclined';
@@ -11,43 +9,20 @@ import { useCallsSubscription } from './queries/webrtc';
 import { VideoCalling } from './components/VideoCalling';
 
 type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'CALL_IN_PROGRESS' | 'NONE' 
+
 // Главный компонент приложения
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
-  // const {data: calls} = useCalls()
   useCallsSubscription()
   const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
   const [localStream, setLocalStream] = useState<MediaStream>()
   const [remoteStream, setRemoteStream] = useState<MediaStream>()
   const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
-  const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
+  const [callingApartment, setCallingApartment] = useState<string | null>(null);
 
-  // Данные о квартирах в доме
-  const apartments = [
-    { id: 1, number: "1", floor: 1 },
-    { id: 2, number: "2", floor: 1 },
-    { id: 3, number: "3", floor: 1 },
-    { id: 4, number: "4", floor: 2 },
-    { id: 5, number: "5", floor: 2 },
-    { id: 6, number: "6", floor: 2 },
-    { id: 7, number: "7", floor: 3 },
-    { id: 8, number: "8", floor: 3 },
-    { id: 9, number: "9", floor: 3 },
-    { id: 10, number: "10", floor: 4 },
-    { id: 11, number: "11", floor: 4 },
-    { id: 12, number: "12", floor: 4 }
-  ];
-
-  const handleSelectApartment = (apartment: Apartment) => {
-    setSelectedApartment(apartment);
-  };
-
-  const handleBack = () => {
-    setSelectedApartment(null);
-  };
-
-  const handleCall = async () => {
+  const handleCall = async (apartmentNumber: string) => {
+    setCallingApartment(apartmentNumber);
     setCallOverlayStatus('CALLING')
     const { call: callData, pc: incomingPC, localStream, remoteStream} = await call(audioRef)
     if (callData) {
@@ -62,10 +37,10 @@ const HomeScreen = () => {
     if (remoteStream) {
       setRemoteStream(remoteStream)
     }
-    // when call status changes show talking screen
   };
+
   const handleEndCall = (status: CallOverlayStatus = 'ENDED') => {
-    setSelectedApartment(null);
+    setCallingApartment(null);
     setCallOverlayStatus(status)
     if (callId) {
       pb.collection('calls').delete(callId)
@@ -81,19 +56,11 @@ const HomeScreen = () => {
     }
   }
 
-  // useEffect(() => {
-  //   if (calls && calls.length < 1 && pc && localStream && callId && callOverlayStatus === 'CALLING') {
-  //     handleEndCall('DECLINED')
-  //   }
-  // }, [calls])
-
   return (
     <div className='flex w-full flex-1 justify-center'>
       <audio ref={audioRef} autoPlay></audio>
       <div className='absolute w-full top-0 right-0'>
-        
         {callOverlayStatus === 'CALLING' && <VideoCalling localStream={localStream} remoteStream={remoteStream} onEndCall={handleEndCall} />}
-        {/* {callOverlayStatus === 'CALLING' && <CallingStatus onEndCall={handleEndCall} />} */}
         {callOverlayStatus === 'CALL_IN_PROGRESS' && <CallInProgress onEndCall={handleEndCall} />}
         {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
           setCallOverlayStatus('NONE')
@@ -102,18 +69,8 @@ const HomeScreen = () => {
           setCallOverlayStatus('NONE')
         }} />}
       </div>
-      {selectedApartment ? (
-        <ApartmentDetail 
-          apartment={selectedApartment}
-          onBack={handleBack}
-          onCall={handleCall}
-        />
-      ) : (
-        <ApartmentList 
-          apartments={apartments}
-          onSelectApartment={handleSelectApartment}
-        />
-      )}
+      
+      <ApartmentInput onCall={handleCall} />
     </div>
   );
 };
