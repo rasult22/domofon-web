@@ -23,6 +23,7 @@ const HomeScreen = () => {
 
   const handleCall = async (apartmentNumber: string) => {
     setCallingApartment(apartmentNumber);
+    console.log('calling apartment:', callingApartment)
     setCallOverlayStatus('CALLING')
     const { call: callData, pc: incomingPC, localStream, remoteStream} = await call(audioRef)
     if (callData) {
