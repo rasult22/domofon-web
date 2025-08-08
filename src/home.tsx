@@ -2,13 +2,14 @@ import { useRef, useState } from 'react';
 import { call } from './webrtc/client';
 import { ApartmentInput } from './components/ApartmentInput';
 import { CallEnded } from './components/CallEnded';
-import { CallInProgress } from './components/CallInProgress';
 import { CallDeclined } from './components/CallDeclined';
 import { pb } from './queries/client';
 import { useCallsSubscription } from './queries/webrtc';
 import { VideoCalling } from './components/VideoCalling';
+import { useNavigate } from 'react-router-dom';
+import { useResComplex } from './queries/res_complex';
 
-type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'CALL_IN_PROGRESS' | 'NONE' 
+type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'NONE' 
 
 // Главный компонент приложения
 const HomeScreen = () => {
@@ -20,6 +21,18 @@ const HomeScreen = () => {
   const [remoteStream, setRemoteStream] = useState<MediaStream>()
   const [callOverlayStatus, setCallOverlayStatus] = useState<CallOverlayStatus>('NONE')
   const [callingApartment, setCallingApartment] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const { data: resComplex, isLoading } = useResComplex()
+
+  if (isLoading) {
+    return <div className='flex justify-center items-center h-screen'>
+      <div className='w-16 h-16 border-4 border-dashed rounded-full animate-spin'></div>
+    </div>
+  }
+  if (!resComplex) {
+    navigate('/random-shit')
+    return
+  }
 
   const handleCall = async (apartmentNumber: string) => {
     setCallingApartment(apartmentNumber);
@@ -59,10 +72,8 @@ const HomeScreen = () => {
 
   return (
     <div className='flex w-full flex-1 justify-center'>
-      <audio ref={audioRef} autoPlay></audio>
       <div className='absolute w-full top-0 right-0'>
         {callOverlayStatus === 'CALLING' && <VideoCalling localStream={localStream} remoteStream={remoteStream} onEndCall={handleEndCall} />}
-        {callOverlayStatus === 'CALL_IN_PROGRESS' && <CallInProgress onEndCall={handleEndCall} />}
         {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
           setCallOverlayStatus('NONE')
         }} />}
@@ -70,8 +81,7 @@ const HomeScreen = () => {
           setCallOverlayStatus('NONE')
         }} />}
       </div>
-      
-      <ApartmentInput onCall={handleCall} />
+      <ApartmentInput resComplexName={resComplex.name} onCall={handleCall} />
     </div>
   );
 };

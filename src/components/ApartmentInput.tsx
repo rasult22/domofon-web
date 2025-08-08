@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Phone, Home, Delete } from 'lucide-react';
 
 type ApartmentInputProps = {
+  resComplexName: string
   onCall: (apartmentNumber: string) => void;
 };
 
-export const ApartmentInput = ({ onCall }: ApartmentInputProps) => {
+export const ApartmentInput = ({ onCall, resComplexName }: ApartmentInputProps) => {
   const [apartmentNumber, setApartmentNumber] = useState('');
 
   const handleNumberClick = (number: string) => {
@@ -36,7 +37,7 @@ export const ApartmentInput = ({ onCall }: ApartmentInputProps) => {
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="text-center mb-6">
             <Home className="w-12 h-12 text-blue-600 mx-auto mb-2" />
-            <h1 className="text-2xl font-bold text-gray-800">ЖК Солнечный</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{resComplexName}</h1>
             <p className="text-gray-600">Введите номер квартиры</p>
           </div>
           
