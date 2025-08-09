@@ -58,7 +58,9 @@ const HomeScreen = () => {
     setCallingApartment(null);
     setCallOverlayStatus(status)
     if (callId) {
-      pb.collection('calls').delete(callId)
+      pb.collection('calls').update(callId, {
+        status: 'ENDED'
+      })
     }
     if (pc) {
       pc.close()

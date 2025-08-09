@@ -1,4 +1,5 @@
 import PocketBase from "pocketbase";
+import {v4 as uuidv4} from 'uuid'
 
 const pb = new PocketBase("https://rasult22.pockethost.io");
 pb.autoCancellation(false)
@@ -78,6 +79,7 @@ export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>, a
 
   // creating call in the backend
   const call = await calls.create({
+    call_uuid: uuidv4(),
     complex_id: res_complex_id || DEFAULT_RES_COMPLEX_ID,
     apartment_number,
     status: 'START' // START | PENDING | CONNECTED | ENDED
