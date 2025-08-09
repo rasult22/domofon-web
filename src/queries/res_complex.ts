@@ -13,6 +13,7 @@ export const useResComplex = () => useQuery({
       throw new Error('res_complex_id is required');
     }
     return pb.collection('res_complexes').getOne<{
+      id: string
       name: string
     }>(resComplexId)
   }

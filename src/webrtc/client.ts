@@ -7,15 +7,8 @@ const offerCandidates = pb.collection("offer_candidates");
 const answerCandidates = pb.collection("answer_candidates");
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>) => {
-
-  // authenticate
-  const auth = await pb
-    .collection("users")
-    .authWithPassword('webrtc_web', '12345678');
-
-  // get user id
-  const userId = auth.record.id;
+export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>, apartment_number: string, res_complex_id: string) => {
+  // should we check if apartment_number is exist in res_complex and have user attached to it?
 
   // get ice servers
   const servers = {
@@ -36,8 +29,8 @@ export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>) =
   // initialize streams
   const localStream = await navigator.mediaDevices.getUserMedia({
     video: isMobile
-      ? { facingMode: 'user'}
-      : true,
+      ? { facingMode: 'user'} 
+      : true, // enabling front camera on mobile
     audio: {
       echoCancellation: true,
       noiseSuppression: true,
@@ -81,11 +74,13 @@ export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>) =
        Как это обработать? Нужен какой-то таймаут?
        Пользователь может принять звонок но webrtc не установит соединение. 
   */
+ const DEFAULT_RES_COMPLEX_ID = 'd757od5um7yfo8b'
+
   // creating call in the backend
   const call = await calls.create({
-    user_id: userId,
-    receiver_id: 'apmnu73db9u8wsa',
-    status: 'pending'
+    complex_id: res_complex_id || DEFAULT_RES_COMPLEX_ID,
+    apartment_number,
+    status: 'START' // START | PENDING | CONNECTED | ENDED
   })
 
   // sending offer candidates to the backend (pocketbase)

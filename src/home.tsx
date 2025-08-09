@@ -38,7 +38,8 @@ const HomeScreen = () => {
     setCallingApartment(apartmentNumber);
     console.log('calling apartment:', callingApartment)
     setCallOverlayStatus('CALLING')
-    const { call: callData, pc: incomingPC, localStream, remoteStream} = await call(audioRef)
+    const { call: callData, pc: incomingPC, localStream, remoteStream} = await call(audioRef, apartmentNumber, resComplex.id)
+
     if (callData) {
       setCallId(callData.id)
     }
