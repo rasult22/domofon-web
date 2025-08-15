@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { call } from './webrtc/client';
 import { ApartmentInput } from './components/ApartmentInput';
 import { CallEnded } from './components/CallEnded';
 import { CallDeclined } from './components/CallDeclined';
 import { pb } from './queries/client';
-import { useCallsSubscription } from './queries/webrtc';
+import { useCalls, useCallsSubscription } from './queries/webrtc';
 import { VideoCalling } from './components/VideoCalling';
 import { useNavigate } from 'react-router-dom';
 import { useResComplex } from './queries/res_complex';
@@ -15,6 +15,7 @@ type CallOverlayStatus = 'CALLING' | 'ENDED' | 'DECLINED' | 'NONE'
 const HomeScreen = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
   useCallsSubscription()
+  const { data: calls } = useCalls()
   const [pc, setPC] = useState<RTCPeerConnection>()
   const [callId, setCallId] =useState<string>()
   const [localStream, setLocalStream] = useState<MediaStream>()
@@ -23,6 +24,20 @@ const HomeScreen = () => {
   const [callingApartment, setCallingApartment] = useState<string | null>(null);
   const navigate = useNavigate()
   const { data: resComplex, isLoading } = useResComplex()
+
+  useEffect(() => {
+    if (calls && callId) {
+      console.log(calls)
+      const call = calls.find(call => call.id === callId)
+      if (call) {
+        console.log('we have got call')
+        if (call.status === 'ENDED') {
+          console.log('and call is ended by other side')
+          handleEndCall('ENDED', true)
+        }
+      }
+    }
+  }, [calls, callId])
 
   if (isLoading) {
     return <div className='flex justify-center items-center h-screen'>
@@ -54,23 +69,27 @@ const HomeScreen = () => {
     }
   };
 
-  const handleEndCall = (status: CallOverlayStatus = 'ENDED') => {
+  const handleEndCall = (status: CallOverlayStatus = 'ENDED', skipUpdate: boolean = false) => {
     setCallingApartment(null);
     setCallOverlayStatus(status)
-    if (callId) {
+    if (callId && !skipUpdate) {
       pb.collection('calls').update(callId, {
         status: 'ENDED'
       })
     }
     if (pc) {
       pc.close()
+      setPC(undefined)
     }
     if (localStream) {
       console.log('stopping tracks')
       localStream.getTracks().forEach(track => {
         track.stop();
       })
+      setLocalStream(undefined)
+      setRemoteStream(undefined)
     }
+    setCallId('')
   }
 
   return (
