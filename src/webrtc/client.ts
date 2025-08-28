@@ -1,6 +1,16 @@
 import PocketBase from "pocketbase";
 import {v4 as uuidv4} from 'uuid'
 
+export type Call = {
+  id: string,
+  offer: any,
+  answer: any,
+  status: string,
+  apartment_number: string,
+  complex_id: string,
+  call_uuid: string
+}
+
 const pb = new PocketBase("https://rasult22.pockethost.io");
 pb.autoCancellation(false)
 const calls = pb.collection("calls");
@@ -78,13 +88,12 @@ export const call = async (audioRef: React.RefObject<HTMLAudioElement | null>, a
  const DEFAULT_RES_COMPLEX_ID = 'd757od5um7yfo8b'
 
   // creating call in the backend
-  const call = await calls.create({
+  const call = await calls.create<Call>({
     call_uuid: uuidv4(),
     complex_id: res_complex_id || DEFAULT_RES_COMPLEX_ID,
     apartment_number,
     status: 'START' // START | PENDING | CONNECTED | ENDED
   })
-
   // sending offer candidates to the backend (pocketbase)
   pc.onicecandidate = async (event) => {
     if (event.candidate) {
