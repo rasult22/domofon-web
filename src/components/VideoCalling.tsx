@@ -1,18 +1,43 @@
 import { useState, useEffect, useRef } from 'react';
 import { Video, VideoOff, PhoneOff, MicOff, Mic } from 'lucide-react';
+import type { Call } from '../webrtc/client';
+import { pb } from '../queries/client';
 
 type VideoCallingProps = {
   localStream?: MediaStream;
   remoteStream?: MediaStream;
   onEndCall: () => void;
+  callId?: string
 };
 
-export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCallingProps) => {
+export const VideoCalling = ({ localStream, remoteStream, onEndCall, callId }: VideoCallingProps) => {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [call, setCall] = useState<Call>()
+  const unsubscribeRef = useRef<() => void>(() => {})
   const [callDuration, setCallDuration] = useState(0);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(()=> {
+    const fn = async() => {
+      if (callId) {
+        console.log('subscribing')
+        unsubscribeRef.current = await pb.collection('calls').subscribe<Call>(callId, (call) => {
+          console.log('got update on callid ', callId, call)
+          if (call.record.status === 'ENDED') {
+            onEndCall()
+          }
+          setCall(call.record)
+        })
+      }
+    }
+    fn()
+    return () => {
+      console.log('unsubscribing')
+      unsubscribeRef.current?.()
+    }
+  }, [callId])
   
   // Set up video streams
   useEffect(() => {
@@ -78,7 +103,7 @@ export const VideoCalling = ({ localStream, remoteStream, onEndCall }: VideoCall
           
           <div className="flex items-center justify-center mb-4">
             <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-green-600 text-sm">Соединение установлено</span>
+            <span className="text-green-600 text-sm">{call?.status === 'CONNECTED'? 'Соединение установлено' : 'Идет подключение...'}</span>
           </div>
           
           {/* Remote Video (Large) - Портретный формат */}

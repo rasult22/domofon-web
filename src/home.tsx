@@ -95,7 +95,7 @@ const HomeScreen = () => {
   return (
     <div className='flex w-full flex-1 justify-center'>
       <div className='absolute w-full top-0 right-0'>
-        {callOverlayStatus === 'CALLING' && <VideoCalling localStream={localStream} remoteStream={remoteStream} onEndCall={handleEndCall} />}
+        {callOverlayStatus === 'CALLING' && <VideoCalling callId={callId} localStream={localStream} remoteStream={remoteStream} onEndCall={handleEndCall} />}
         {callOverlayStatus === 'ENDED' && <CallEnded onBack={() => {
           setCallOverlayStatus('NONE')
         }} />}
